@@ -21,6 +21,7 @@ async function bootstrap() {
     .setDescription('Documentação da API do Food Hub')
     .setVersion('1.0')
     .addTag('food-hub')
+    .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document, {

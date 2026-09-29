@@ -1,7 +1,8 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { BaseEntity } from '../../shared/entities/base.entity.js';
 import { Exclude } from 'class-transformer';
+import { BaseEntity } from '../../shared/entities/base.entity.js';
+import { Role } from './role.enum.js';
 
 @Entity('users')
 export class User extends BaseEntity {
@@ -24,4 +25,16 @@ export class User extends BaseEntity {
   @Column({ select: false })
   @Exclude()
   password: string;
+
+  @ApiProperty({
+    description: 'Papel do usuário no sistema',
+    enum: Role,
+    default: Role.User,
+  })
+  @Column({ type: 'enum', enum: Role, default: Role.User })
+  role: Role;
+
+  @Exclude()
+  @Column({ name: 'hashed_refresh_token', type: 'varchar', nullable: true })
+  hashedRefreshToken: string | null;
 }
