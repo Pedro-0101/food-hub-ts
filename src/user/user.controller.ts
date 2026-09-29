@@ -8,8 +8,11 @@ import { ApiFindAllUsers } from './decorator/find-all-users-docs.decorator.js';
 import { ApiFindOneUser } from './decorator/find-one-user-docs.decorator.js';
 import { ApiUpdateUser } from './decorator/update-user-docs.decorator.js';
 import { ApiRemoveUser } from './decorator/remove-user-docs.decorator.js';
+import { Roles } from '../auth/decorators/roles.decorator.js';
+import { Role } from './entities/role.enum.js';
 
 @ApiTags('users')
+@Roles(Role.Admin)
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}

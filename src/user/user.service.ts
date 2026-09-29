@@ -1,12 +1,20 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { QueryFailedError, Repository } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
 import { CreateUserDto } from './dto/create-user.dto.js';
 import { UpdateUserDto } from './dto/update-user.dto.js';
 import { User } from './entities/user.entity.js';
 
 const SALT_ROUNDS = 10;
+const UNIQUE_VIOLATION = '23505';
+
+function isUniqueViolation(error: unknown): boolean {
+  return (
+    error instanceof QueryFailedError &&
+    (error.driverError as { code?: string } | undefined)?.code === UNIQUE_VIOLATION
+  );
+}
 
 @Injectable()
 export class UserService {
@@ -18,7 +26,14 @@ export class UserService {
   async create(createUserDto: CreateUserDto) {
     const password = await bcrypt.hash(createUserDto.password, SALT_ROUNDS);
     const user = this.userRepository.create({ ...createUserDto, password });
-    return this.userRepository.save(user);
+    try {
+      return await this.userRepository.save(user);
+    } catch (error) {
+      if (isUniqueViolation(error)) {
+        throw new ConflictException('E-mail já cadastrado');
+      }
+      throw error;
+    }
   }
 
   findAll() {
@@ -46,7 +61,14 @@ export class UserService {
     if (data.password) {
       data.password = await bcrypt.hash(data.password, SALT_ROUNDS);
     }
-    await this.userRepository.update(id, data);
+    try {
+      await this.userRepository.update(id, data);
+    } catch (error) {
+      if (isUniqueViolation(error)) {
+        throw new ConflictException('E-mail já cadastrado');
+      }
+      throw error;
+    }
     return this.findOne(id);
   }
 
