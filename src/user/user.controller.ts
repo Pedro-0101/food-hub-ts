@@ -1,59 +1,40 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import {
-  ApiCreatedResponse,
-  ApiNotFoundResponse,
-  ApiOkResponse,
-  ApiOperation,
-  ApiParam,
-  ApiTags,
-} from '@nestjs/swagger';
+import { Body, Controller, Param } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { UserService } from './user.service.js';
 import { CreateUserDto } from './dto/create-user.dto.js';
 import { UpdateUserDto } from './dto/update-user.dto.js';
-import { User } from './entities/user.entity.js';
+import { ApiCreateUser } from './decorator/create-user-docs.decorator.js';
+import { ApiFindAllUsers } from './decorator/find-all-users-docs.decorator.js';
+import { ApiFindOneUser } from './decorator/find-one-user-docs.decorator.js';
+import { ApiUpdateUser } from './decorator/update-user-docs.decorator.js';
+import { ApiRemoveUser } from './decorator/remove-user-docs.decorator.js';
 
 @ApiTags('users')
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post()
-  @ApiOperation({ summary: 'Cria um novo usuário' })
-  @ApiCreatedResponse({ type: User })
+  @ApiCreateUser()
   create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
   }
 
-  @Get()
-  @ApiOperation({ summary: 'Lista todos os usuários' })
-  @ApiOkResponse({ type: [User] })
+  @ApiFindAllUsers()
   findAll() {
     return this.userService.findAll();
   }
 
-  @Get(':id')
-  @ApiOperation({ summary: 'Busca um usuário pelo ID' })
-  @ApiParam({ name: 'id', description: 'ID (UUID) do usuário' })
-  @ApiOkResponse({ type: User })
-  @ApiNotFoundResponse({ description: 'Usuário não encontrado' })
+  @ApiFindOneUser()
   findOne(@Param('id') id: string) {
     return this.userService.findOne(id);
   }
 
-  @Patch(':id')
-  @ApiOperation({ summary: 'Atualiza um usuário pelo ID' })
-  @ApiParam({ name: 'id', description: 'ID (UUID) do usuário' })
-  @ApiOkResponse({ type: User })
-  @ApiNotFoundResponse({ description: 'Usuário não encontrado' })
+  @ApiUpdateUser()
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.userService.update(id, updateUserDto);
   }
 
-  @Delete(':id')
-  @ApiOperation({ summary: 'Remove um usuário pelo ID' })
-  @ApiParam({ name: 'id', description: 'ID (UUID) do usuário' })
-  @ApiOkResponse({ description: 'Usuário removido com sucesso' })
-  @ApiNotFoundResponse({ description: 'Usuário não encontrado' })
+  @ApiRemoveUser()
   remove(@Param('id') id: string) {
     return this.userService.remove(id);
   }
